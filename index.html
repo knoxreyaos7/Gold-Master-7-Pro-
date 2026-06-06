@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="XAU Compounder">
-<title>XAU Compounder Pro · Simulator</title>
+<title>XAU Compounder Pro · Live</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inconsolata:wght@300;400;500;600;700&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
@@ -292,22 +292,21 @@ tbody td{padding:9px 11px;font-family:var(--f-mono);font-size:11px;vertical-alig
 .modal-btns .btn-confirm{border-color:var(--au-dim);background:var(--au-ghost);color:var(--au-bright)}
 .modal-btns button:hover{filter:brightness(1.15)}
 
+
+/* ── BOT TOGGLE ── */
+.bot-btn{display:flex;align-items:center;gap:7px;padding:6px 14px;border-radius:20px;border:none;font-family:var(--f-mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .25s;flex-shrink:0}
+.bot-inactive{background:var(--void3);border:1px solid var(--rim2);color:var(--ink3)}
+.bot-inactive:hover{border-color:var(--au-dim);color:var(--au-bright)}
+.bot-active{background:linear-gradient(135deg,#00664d,#00e676);color:#000;box-shadow:0 0 18px rgba(0,230,118,.35)}
+.bot-active:hover{filter:brightness(1.1)}
+.bot-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0}
+.bot-active .bot-dot{animation:blink 1s ease-in-out infinite}
 /* ── ANIMATIONS ── */
 @keyframes fade-in-up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .view.active{animation:fade-in-up .25s ease}
 @keyframes flash-gold{0%,100%{color:inherit}50%{color:var(--au-bright)}}
 .flash{animation:flash-gold .4s ease}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
-
-/* ── BOT BUTTON ── */
-.bot-btn{display:flex;align-items:center;gap:6px;font-family:var(--f-mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 12px;border-radius:20px;border:none;cursor:pointer;user-select:none;transition:all .25s;flex-shrink:0}
-.bot-btn.bot-off{background:var(--void3);border:1px solid var(--rim2);color:var(--ink3)}
-.bot-btn.bot-off:hover{border-color:var(--bull);color:var(--bull)}
-.bot-btn.bot-on{background:linear-gradient(135deg,#003d26,#006644);border:1px solid var(--bull);color:var(--bull);box-shadow:0 0 14px rgba(0,230,118,.25);animation:bot-pulse 2s ease-in-out infinite}
-@keyframes bot-pulse{0%,100%{box-shadow:0 0 14px rgba(0,230,118,.25)}50%{box-shadow:0 0 22px rgba(0,230,118,.45)}}
-.close-all-btn{background:var(--bear-dim);border:1px solid rgba(255,61,87,.35);color:var(--bear);font-family:var(--f-mono);font-size:10px;font-weight:700;letter-spacing:.08em;padding:6px 12px;border-radius:var(--r2);cursor:pointer;transition:all .2s}
-.close-all-btn:hover{background:rgba(255,61,87,.25);border-color:var(--bear)}
-.sim-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(64,196,255,.1);border:1px solid rgba(64,196,255,.3);border-radius:var(--r2);padding:3px 9px;font-family:var(--f-mono);font-size:9px;color:var(--neutral);letter-spacing:.1em;margin-bottom:10px}
 
 /* ── RESPONSIVE ── */
 @media(max-width:480px){
@@ -336,7 +335,7 @@ tbody td{padding:9px 11px;font-family:var(--f-mono);font-size:11px;vertical-alig
     </div>
     <div>
       <div class="brand-text">XAU Compounder</div>
-      <div class="brand-sub">Simulator · ICT · SMC · M1/M5/M15</div>
+      <div class="brand-sub">Deriv Live · ICT · SMC · Pure M1 Structure</div>
     </div>
   </div>
   <div class="hdr-spacer"></div>
@@ -351,7 +350,7 @@ tbody td{padding:9px 11px;font-family:var(--f-mono);font-size:11px;vertical-alig
     <div class="ws-dot" id="ws-dot"></div>
     <span id="ws-label">OFFLINE</span>
   </div>
-  <button id="auto-trade-btn" class="bot-btn bot-off" onclick="AutoTrader.toggle(this)">▶ START BOT</button>
+  <button class="bot-btn bot-inactive" id="bot-toggle-btn" onclick="PaperTrader.toggle()"><span class="bot-dot"></span> START BOT</button>
   <div class="equity-chip" id="equity-chip">$—</div>
 </header>
 
@@ -372,16 +371,10 @@ tbody td{padding:9px 11px;font-family:var(--f-mono);font-size:11px;vertical-alig
 <!-- ── DASHBOARD ── -->
 <div class="view active" id="view-dashboard">
   <div class="g g-4" style="margin-bottom:10px">
-    <div class="panel"><div class="panel-title"><span class="pt-icon">◈</span> Balance</div><div class="metric lg au" id="d-balance">$—</div><div class="metric-sub">Simulated capital</div></div>
-    <div class="panel"><div class="panel-title"><span class="pt-icon">↑</span> Session P&L</div><div class="metric" id="d-daily-pnl">$0.00</div><div class="metric-sub" id="d-daily-sub">0 trades</div></div>
-    <div class="panel"><div class="panel-title"><span class="pt-icon">⊞</span> Open Positions</div><div class="metric nt" id="d-open-pos">0</div><div class="metric-sub" id="d-float-pnl-dash">Float: $0.00</div></div>
+    <div class="panel"><div class="panel-title"><span class="pt-icon">◈</span> Balance</div><div class="metric lg au" id="d-balance">$—</div><div class="metric-sub">Demo capital</div></div>
+    <div class="panel"><div class="panel-title"><span class="pt-icon">↑</span> Daily P&L</div><div class="metric" id="d-daily-pnl">$0.00</div><div class="metric-sub" id="d-daily-sub">0 trades</div></div>
+    <div class="panel"><div class="panel-title"><span class="pt-icon">⊞</span> Open Positions</div><div class="metric nt" id="d-open-pos">0</div><div class="metric-sub">Live exposure</div></div>
     <div class="panel"><div class="panel-title"><span class="pt-icon">◻</span> Win Rate</div><div class="metric" id="d-winrate">—</div><div class="metric-sub" id="d-winrate-sub">All time</div></div>
-  </div>
-
-  <!-- Bot status banner -->
-  <div id="bot-status-bar" style="display:none;background:linear-gradient(135deg,rgba(0,230,118,.08),rgba(0,230,118,.04));border:1px solid rgba(0,230,118,.25);border-radius:var(--r2);padding:8px 13px;margin-bottom:10px;display:none;align-items:center;justify-content:space-between">
-    <div style="font-family:var(--f-mono);font-size:10px;color:var(--bull);letter-spacing:.08em">🤖 AUTO TRADER ACTIVE — monitoring for signals</div>
-    <button class="close-all-btn" onclick="AutoTrader.closeAll()">⊠ Close All</button>
   </div>
 
   <!-- Candlestick chart (from index.html) -->
@@ -412,20 +405,20 @@ tbody td{padding:9px 11px;font-family:var(--f-mono);font-size:11px;vertical-alig
     </div>
   </div>
 
-  <div class="section-hdr">Gate Status · M5</div>
+  <div class="section-hdr">Gate Status · M1 Structure</div>
   <div class="gate-row" id="d-gates-m5">
-    <div class="gate-block" data-g="0"><div class="gate-icon">—</div><div class="gate-lbl">BOS</div></div>
+    <div class="gate-block" data-g="0"><div class="gate-icon">—</div><div class="gate-lbl">BOS/CHoCH</div></div>
     <div class="gate-block" data-g="1"><div class="gate-icon">—</div><div class="gate-lbl">FVG</div></div>
     <div class="gate-block" data-g="2"><div class="gate-icon">—</div><div class="gate-lbl">OB</div></div>
-    <div class="gate-block" data-g="3"><div class="gate-icon">—</div><div class="gate-lbl">Bias</div></div>
-    <div class="gate-block" data-g="4"><div class="gate-icon">—</div><div class="gate-lbl">Sess</div></div>
+    <div class="gate-block" data-g="3"><div class="gate-icon">—</div><div class="gate-lbl">Disp</div></div>
+    <div class="gate-block" data-g="4"><div class="gate-icon">—</div><div class="gate-lbl">Session</div></div>
   </div>
 
   <div class="panel" style="margin-bottom:10px">
-    <div class="panel-title"><span class="pt-icon">◈</span> Timeframe Alignment</div>
-    <div class="tf-score-row"><div class="tf-tag">M15</div><div class="score-track"><div class="score-fill" id="sf-m15" style="width:0%"></div></div><div class="score-num" id="sn-m15">0/5</div></div>
-    <div class="tf-score-row"><div class="tf-tag">M5</div><div class="score-track"><div class="score-fill" id="sf-m5" style="width:0%"></div></div><div class="score-num" id="sn-m5">0/5</div></div>
-    <div class="tf-score-row" style="margin-bottom:0"><div class="tf-tag">M1</div><div class="score-track"><div class="score-fill" id="sf-m1" style="width:0%"></div></div><div class="score-num" id="sn-m1">0/5</div></div>
+    <div class="panel-title"><span class="pt-icon">◈</span> Gate Confluence Score · M1</div>
+    <div class="tf-score-row"><div class="tf-tag" style="width:50px">BOS</div><div class="score-track"><div class="score-fill" id="sf-m15" style="width:0%"></div></div><div class="score-num" id="sn-m15">0/5</div></div>
+    <div class="tf-score-row"><div class="tf-tag" style="width:50px">OB/FVG</div><div class="score-track"><div class="score-fill" id="sf-m5" style="width:0%"></div></div><div class="score-num" id="sn-m5">0/5</div></div>
+    <div class="tf-score-row" style="margin-bottom:0"><div class="tf-tag" style="width:50px">Full</div><div class="score-track"><div class="score-fill" id="sf-m1" style="width:0%"></div></div><div class="score-num" id="sn-m1">0/5</div></div>
   </div>
 
   <div class="g g-3">
@@ -443,11 +436,11 @@ tbody td{padding:9px 11px;font-family:var(--f-mono);font-size:11px;vertical-alig
     <div style="font-family:var(--f-mono);font-size:10px;color:var(--ink3)">Last evaluated: <span id="sig-eval-time">—</span></div>
   </div>
   <div class="g g-2" style="margin-bottom:10px">
-    <div class="panel"><div class="panel-title">Confluence Score</div><div class="metric lg au" id="sig-score-val">0</div><div class="metric-sub">M5+M1 HTF+M1 gates</div></div>
+    <div class="panel"><div class="panel-title">Confluence Score</div><div class="metric lg au" id="sig-score-val">0</div><div class="metric-sub">M1 BMS · OB · FVG · Disp</div></div>
     <div class="panel"><div class="panel-title">Entry Quality</div><div class="metric" id="sig-quality">—</div><div class="metric-sub" id="sig-quality-sub">All gates required</div></div>
   </div>
 
-  <div class="section-hdr">Gate Detail · M5</div>
+  <div class="section-hdr">Gate Detail · M1 Structure</div>
   <div class="gate-row" id="s-gates-m5">
     <div class="gate-block" data-g="0"><div class="gate-icon">—</div><div class="gate-lbl">BOS/CHoCH</div></div>
     <div class="gate-block" data-g="1"><div class="gate-icon">—</div><div class="gate-lbl">FVG</div></div>
@@ -456,12 +449,12 @@ tbody td{padding:9px 11px;font-family:var(--f-mono);font-size:11px;vertical-alig
     <div class="gate-block" data-g="4"><div class="gate-icon">—</div><div class="gate-lbl">Session</div></div>
   </div>
 
-  <div class="section-hdr">Gate Detail · M1</div>
+  <div class="section-hdr">Gate Detail · M1 Execution</div>
   <div class="gate-row" id="s-gates-m1">
     <div class="gate-block" data-g="0"><div class="gate-icon">—</div><div class="gate-lbl">BOS/CHoCH</div></div>
     <div class="gate-block" data-g="1"><div class="gate-icon">—</div><div class="gate-lbl">FVG</div></div>
     <div class="gate-block" data-g="2"><div class="gate-icon">—</div><div class="gate-lbl">Ord Block</div></div>
-    <div class="gate-block" data-g="3"><div class="gate-icon">—</div><div class="gate-lbl">M1 Trend</div></div>
+    <div class="gate-block" data-g="3"><div class="gate-icon">—</div><div class="gate-lbl">Disp Candle</div></div>
     <div class="gate-block" data-g="4"><div class="gate-icon">—</div><div class="gate-lbl">Session</div></div>
   </div>
 
@@ -474,14 +467,10 @@ tbody td{padding:9px 11px;font-family:var(--f-mono);font-size:11px;vertical-alig
 <!-- ── POSITIONS ── -->
 <div class="view" id="view-positions">
   <div class="section-hdr">Active Positions</div>
-  <div class="sim-badge">🤖 SIMULATED FUNDS — no real money at risk</div>
   <div class="g g-3" style="margin-bottom:10px">
     <div class="panel"><div class="panel-title">Open Count</div><div class="metric sm nt" id="p-count">0</div></div>
     <div class="panel"><div class="panel-title">Float P&L</div><div class="metric sm" id="p-float">$0.00</div></div>
     <div class="panel"><div class="panel-title">Total Lots</div><div class="metric sm au" id="p-lots">0.00</div></div>
-  </div>
-  <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
-    <button class="close-all-btn" onclick="AutoTrader.closeAll()">⊠ Close All Positions</button>
   </div>
   <div class="table-wrap">
     <table>
@@ -562,25 +551,10 @@ tbody td{padding:9px 11px;font-family:var(--f-mono);font-size:11px;vertical-alig
 <!-- ── SETTINGS ── -->
 <div class="view" id="view-settings">
   <div class="settings-block">
-    <div class="settings-block-hdr">🤖 Simulated Auto Trading</div>
-    <div class="deriv-notice" style="background:linear-gradient(135deg,rgba(0,230,118,.06),rgba(0,230,118,.02));border-color:rgba(0,230,118,.2);color:rgba(0,230,118,.85)">
-      <strong>✅ PAPER TRADING — NO REAL MONEY</strong>
-      The bot opens simulated positions using live XAU/USD prices. All P&amp;L affects your demo balance only.
-    </div>
-    <div class="panel">
-      <div class="toggle-line">
-        <div><div class="toggle-text">Auto Trade Bot</div><div class="toggle-desc">Automatically opens/manages trades on signals</div></div>
-        <div class="toggle-switch" id="tog-autobot" onclick="AutoTrader.toggle($('auto-trade-btn'));this.classList.toggle('on')"></div>
-      </div>
-    </div>
-    <button class="action-btn danger-btn" style="margin-top:8px;background:linear-gradient(135deg,#3a0a14,#8a1025)" onclick="AutoTrader.closeAll()">⊠ Close All Open Positions</button>
-  </div>
-
-  <div class="settings-block">
     <div class="settings-block-hdr">Live Feed — Deriv WebSocket</div>
     <div class="deriv-notice">
       <strong>✅ DERIV FEED ACTIVE</strong>
-      Live XAU/USD bid/ask ticks stream free via Deriv WebSocket (frxXAUUSD). Historical OHLC candles auto-loaded on connect. No API key required.
+      Live XAU/USD bid/ask ticks stream free via Deriv WebSocket (frxXAUUSD). Bot trades <strong>pure M1 structure only</strong> — BMS, OB, FVG detected on 1-minute candles. No API key required.
     </div>
     <div class="stat-row"><span class="sr-label">Symbol</span><span class="sr-value">frxXAUUSD</span></div>
     <div class="stat-row"><span class="sr-label">App ID</span><span class="sr-value">1089 (public demo)</span></div>
@@ -952,37 +926,39 @@ const strategy = {
   bearishDisplacement(c){ return !!c&&c.close<c.open&&this.displacementStrength(c)>=0.65; },
 
   bullishScore(bms){
+    // M1-only scoring — no HTF filters
     let score=0;
-    const lastCandle=candles[60][candles[60].length-1];
+    const last=candles[60]; if(!last||!last.length) return 0;
+    const lastCandle=last[last.length-1];
     const _ob=bms&&bms.valid?bms.ob:null;
-    if(bms&&bms.valid) score+=2;
-    if(this.bullishMSS()) score+=2;
-    if(this.bullishDisplacement(lastCandle)) score+=2;
-    if(_ob) score+=1;
-    if(bms&&bms.fvg) score+=1;
-    if(this.zonesOverlap(_ob,bms&&bms.fvg)) score+=2;
-    if(this.premiumDiscount(mid)==='discount') score+=1;
-    if(this.inKillZone()) score+=2;
-    const m5=this.m5TrendBias(),m1=this.m1TrendBias();
-    if(m5==='bull') score+=3; if(m1==='bull') score+=2;
-    if(this.m5BullishFVG()) score+=1; if(this.m5BullishOB()) score+=1;
+    const _fvg=bms&&bms.valid?bms.fvg:null;
+    if(bms&&bms.valid)                              score+=3; // BMS confirmed
+    if(this.bullishMSS())                           score+=2; // MSS candle
+    if(this.bullishDisplacement(lastCandle))        score+=2; // strong M1 displacement
+    if(bms&&this.bullishDisplacement(bms.bmsCandle))score+=1; // BMS candle strength
+    if(_ob)                                         score+=2; // M1 OB present
+    if(_fvg)                                        score+=2; // M1 FVG present
+    if(this.zonesOverlap(_ob,_fvg))                 score+=2; // OB+FVG confluence
+    if(this.premiumDiscount(mid)==='discount')       score+=1; // price in discount
+    if(this.inKillZone())                           score+=2; // kill zone timing
     return score;
   },
   bearishScore(bms){
+    // M1-only scoring — no HTF filters
     let score=0;
-    const lastCandle=candles[60][candles[60].length-1];
+    const last=candles[60]; if(!last||!last.length) return 0;
+    const lastCandle=last[last.length-1];
     const _ob=bms&&bms.valid?bms.ob:null;
-    if(bms&&bms.valid) score+=2;
-    if(this.bearishMSS()) score+=2;
-    if(this.bearishDisplacement(lastCandle)) score+=2;
-    if(_ob) score+=1;
-    if(bms&&bms.fvg) score+=1;
-    if(this.zonesOverlap(_ob,bms&&bms.fvg)) score+=2;
-    if(this.premiumDiscount(mid)==='premium') score+=1;
-    if(this.inKillZone()) score+=2;
-    const m5=this.m5TrendBias(),m1=this.m1TrendBias();
-    if(m5==='bear') score+=3; if(m1==='bear') score+=2;
-    if(this.m5BearishFVG()) score+=1; if(this.m5BearishOB()) score+=1;
+    const _fvg=bms&&bms.valid?bms.fvg:null;
+    if(bms&&bms.valid)                              score+=3; // BMS confirmed
+    if(this.bearishMSS())                           score+=2; // MSS candle
+    if(this.bearishDisplacement(lastCandle))        score+=2; // strong M1 displacement
+    if(bms&&this.bearishDisplacement(bms.bmsCandle))score+=1; // BMS candle strength
+    if(_ob)                                         score+=2; // M1 OB present
+    if(_fvg)                                        score+=2; // M1 FVG present
+    if(this.zonesOverlap(_ob,_fvg))                 score+=2; // OB+FVG confluence
+    if(this.premiumDiscount(mid)==='premium')        score+=1; // price in premium
+    if(this.inKillZone())                           score+=2; // kill zone timing
     return score;
   },
 
@@ -1042,45 +1018,51 @@ const strategy = {
   bearishOBCandle2(){ const r=this.bearishBMS(); return r.valid?r.obCandle:null; },
 
   evalBuy(price){
-    const bms=this.bullishBMS(),bmsOk=bms.valid,score=this.bullishScore(bms);
-    const ob=bmsOk?bms.ob:null,fvg=bmsOk?bms.fvg:null;
-    const htf=this.htfConflCheck('UP',score);
-    let inOBZone=false,inFVGZone=false;
-    if(ob){const zone=this.entryZone(ob,0.20,0.50);inOBZone=price>=zone.low&&price<=zone.high;}
-    if(fvg){const sz=fvg.high-fvg.low;inFVGZone=price>=(fvg.low+sz*0.20)&&price<=(fvg.low+sz*0.50);}
-    const inZone=inOBZone||inFVGZone;
-    const lastCandle=candles[60][candles[60].length-1];
-    const disp=this.bullishDisplacement(bms.bmsCandle||lastCandle)||this.bullishDisplacement(lastCandle);
-    const aboveSweep=bmsOk&&price>bms.sweepLow;
-    const inSession=this.activeSession()!=='OFF-HOURS';
-    const htfOk=htf.htfGateOk;
-    const m5Conflict=htf.m5Bias==='bear'&&!htf.m15Aligned;
-    const isAPlusSetup=score>=14;
-    const zoneOk=inZone;
-    const signal=bmsOk&&zoneOk&&aboveSweep&&(isAPlusSetup||(inSession&&htfOk&&!m5Conflict));
-    const quality=score>=14?3:score>=9?2:1;
-    return {signal,quality,score,htf,sweepIdx:bmsOk?bms.sweepIdx:undefined,sweepEpoch:bmsOk?bms.sweepEpoch:undefined,sweepLow:bmsOk?bms.sweepLow:undefined,ob,fvg,conds:{bSess:inSession,bBMS:bmsOk,bHTF:htfOk,bOB:!!ob,bFVG:bmsOk&&!!fvg,bEntry:signal}};
+    // Pure M1 structure — no HTF confluence required
+    const bms=this.bullishBMS();
+    if(!bms.valid) return {signal:false,score:0,quality:1,ob:null,fvg:null};
+    const ob=bms.ob, fvg=bms.fvg;
+    const score=this.bullishScore(bms);
+    // Entry zone: inside M1 OB or FVG
+    let inOBZone=false, inFVGZone=false;
+    if(ob){
+      const zone=this.entryZone(ob,0.10,0.85);
+      inOBZone=price>=zone.low&&price<=zone.high;
+    }
+    if(fvg){
+      const sz=fvg.high-fvg.low;
+      inFVGZone=price>=(fvg.low+sz*0.05)&&price<=(fvg.low+sz*0.95);
+    }
+    const inZone = inOBZone || inFVGZone || (!ob && !fvg && bms.valid); // allow entry if BMS but no zone yet
+    const aboveSweep = price > bms.sweepLow;
+    // Signal: BMS confirmed + price above sweep + at least OB or FVG or strong score
+    const signal = bms.valid && aboveSweep && inZone;
+    const quality = score>=12?3:score>=7?2:1;
+    return {signal,quality,score,ob,fvg,sweepIdx:bms.sweepIdx,sweepEpoch:bms.sweepEpoch,sweepLow:bms.sweepLow};
   },
 
   evalSell(price){
-    const bms=this.bearishBMS(),bmsOk=bms.valid,score=this.bearishScore(bms);
-    const ob=bmsOk?bms.ob:null,fvg=bmsOk?bms.fvg:null;
-    const htf=this.htfConflCheck('DOWN',score);
-    let inOBZone=false,inFVGZone=false;
-    if(ob){const zone=this.entryZone(ob,0.50,0.80);inOBZone=price>=zone.low&&price<=zone.high;}
-    if(fvg){const sz=fvg.high-fvg.low;inFVGZone=price>=(fvg.low+sz*0.50)&&price<=(fvg.low+sz*0.80);}
-    const inZone=inOBZone||inFVGZone;
-    const lastCandle=candles[60][candles[60].length-1];
-    const disp=this.bearishDisplacement(bms.bmsCandle||lastCandle)||this.bearishDisplacement(lastCandle);
-    const belowSweep=bmsOk&&price<bms.sweepHigh;
-    const inSession=this.activeSession()!=='OFF-HOURS';
-    const htfOk=htf.htfGateOk;
-    const m5Conflict=htf.m5Bias==='bull'&&!htf.m15Aligned;
-    const isAPlusSetup=score>=14;
-    const zoneOk=inZone;
-    const signal=bmsOk&&zoneOk&&belowSweep&&(isAPlusSetup||(inSession&&htfOk&&!m5Conflict));
-    const quality=score>=14?3:score>=9?2:1;
-    return {signal,quality,score,htf,sweepIdx:bmsOk?bms.sweepIdx:undefined,sweepEpoch:bmsOk?bms.sweepEpoch:undefined,sweepHigh:bmsOk?bms.sweepHigh:undefined,ob,fvg,conds:{sSess:inSession,sBMS:bmsOk,sHTF:htfOk,sOB:!!ob,sFVG:bmsOk&&!!fvg,sEntry:signal}};
+    // Pure M1 structure — no HTF confluence required
+    const bms=this.bearishBMS();
+    if(!bms.valid) return {signal:false,score:0,quality:1,ob:null,fvg:null};
+    const ob=bms.ob, fvg=bms.fvg;
+    const score=this.bearishScore(bms);
+    // Entry zone: inside M1 OB or FVG
+    let inOBZone=false, inFVGZone=false;
+    if(ob){
+      const zone=this.entryZone(ob,0.15,0.90);
+      inOBZone=price>=zone.low&&price<=zone.high;
+    }
+    if(fvg){
+      const sz=fvg.high-fvg.low;
+      inFVGZone=price>=(fvg.low+sz*0.05)&&price<=(fvg.low+sz*0.95);
+    }
+    const inZone = inOBZone || inFVGZone || (!ob && !fvg && bms.valid);
+    const belowSweep = price < bms.sweepHigh;
+    // Signal: BMS confirmed + price below sweep + in zone
+    const signal = bms.valid && belowSweep && inZone;
+    const quality = score>=12?3:score>=7?2:1;
+    return {signal,quality,score,ob,fvg,sweepIdx:bms.sweepIdx,sweepEpoch:bms.sweepEpoch,sweepHigh:bms.sweepHigh};
   },
 };
 
@@ -1482,9 +1464,7 @@ function _handleDerivMsg(msg) {
     const spreadEl=$('d-spread'); if(spreadEl) spreadEl.textContent=spreadPts.toFixed(2)+'pt';
 
     _processTick(newMid,epochSec);
-
-    // AutoTrader tick update (position management)
-    AutoTrader.onTick(newMid);
+    PaperTrader.tick(newMid);
 
     // Run gate evaluation every tick (throttled to ~1s via lastGateEvalTime)
     const now=Date.now();
@@ -1522,67 +1502,69 @@ function _handleDerivMsg(msg) {
 // ══════════════════════════════════════════════════════
 const GateEval = {
   run() {
-    if(!mid||!candles[60].length) return;
+    if (!mid || !candles[60].length) return;
 
-    const m5Bias=strategy.m5TrendBias();
-    const m1Bias=strategy.m1TrendBias();
-    const inSession=strategy.activeSession()!=='OFF-HOURS';
+    // ── Pure M1 gate evaluation ──
+    const arr         = candles[60];
+    const lastCandle  = arr[arr.length - 1];
+    const bullBMS     = strategy.bullishBMS();
+    const bearBMS     = strategy.bearishBMS();
+    const inSession   = strategy.activeSession() !== 'OFF-HOURS';
 
-    // ── M5 gates ──
-    const m5Bos=m5Bias!=='neutral';
-    const m5Fvg=!!(strategy.m5BullishFVG()||strategy.m5BearishFVG());
-    const m5Ob=!!(strategy.m5BullishOB()||strategy.m5BearishOB());
-    const m5Bias2=m5Bias!=='neutral';
-    AppState.gateState['M5']=[m5Bos,m5Fvg,m5Ob,m5Bias2,inSession];
+    // G1: Break of Structure / CHoCH detected on M1
+    const g1 = bullBMS.valid || bearBMS.valid;
+    // G2: Fair Value Gap present on M1
+    const g2 = !!(strategy.bullishFVGZone() || strategy.bearishFVGZone());
+    // G3: Order Block present on M1
+    const g3 = !!(strategy.bullishOB() || strategy.bearishOB());
+    // G4: Strong displacement candle on M1 (confirms institutional intent)
+    const g4 = strategy.bullishDisplacement(lastCandle) || strategy.bearishDisplacement(lastCandle);
+    // G5: Active trading session
+    const g5 = inSession;
 
-    // ── M1 gates ──
-    const bullBMS=strategy.bullishBMS(), bearBMS=strategy.bearishBMS();
-    const m1Bos=bullBMS.valid||bearBMS.valid;
-    const m1Fvg=!!(strategy.bullishFVGZone()||strategy.bearishFVGZone());
-    const m1Ob=!!(strategy.bullishOB()||strategy.bearishOB());
-    const m1Bias2=m1Bias!=='neutral';
-    AppState.gateState['M1']=[m1Bos,m1Fvg,m1Ob,m1Bias2,inSession];
+    const gates = [g1, g2, g3, g4, g5];
+    AppState.gateState['M1']  = gates;
+    AppState.gateState['M5']  = gates; // mirror for UI bars
+    AppState.gateState['M15'] = gates;
 
-    // ── M15 gates (use M15 bias + M5 OB for reference) ──
-    const m15Bias=strategy.m15TrendBias();
-    const m15Bos=m15Bias!=='neutral';
-    const m15Fvg=m5Fvg; // use M5 FVG as proxy
-    const m15Ob=m5Ob;
-    const m15BiasBool=m15Bias!=='neutral';
-    AppState.gateState['M15']=[m15Bos,m15Fvg,m15Ob,m15BiasBool,inSession];
+    // ── M1-only signal evaluation ──
+    const prevSignal = AppState.currentSignal;
+    const bs = strategy.evalBuy(mid);
+    const ss = strategy.evalSell(mid);
 
-    // ── Signal evaluation ──
-    const bs=strategy.evalBuy(mid);
-    const ss=strategy.evalSell(mid);
-    const prevSignal=AppState.currentSignal;
-
-    if(bs.signal){
-      AppState.currentSignal='bullish';
-      AppState.signalScore=bs.score;
-      AppState.signalQuality=bs.quality;
-      if(prevSignal!=='bullish'){
-        const grade=bs.quality>=3?'★★★':bs.quality===2?'★★':'★';
-        SignalLog.add('buy',`BUY ${grade} score:${bs.score} [${strategy.activeSession()}${strategy.activeKillZone()?' · '+strategy.activeKillZone():''}]`,mid);
-        AutoTrader.onSignal('bullish', bs.quality);
+    if (bs.signal) {
+      AppState.currentSignal = 'bullish';
+      AppState.signalScore   = bs.score;
+      AppState.signalQuality = bs.quality;
+      if (prevSignal !== 'bullish') {
+        const grade = bs.quality >= 3 ? '★★★' : bs.quality === 2 ? '★★' : '★';
+        SignalLog.add('buy',
+          `BUY ${grade} M1-BMS | score:${bs.score} | ${strategy.activeSession()}${strategy.activeKillZone() ? ' · ' + strategy.activeKillZone() : ''}`,
+          mid);
       }
-    } else if(ss.signal){
-      AppState.currentSignal='bearish';
-      AppState.signalScore=ss.score;
-      AppState.signalQuality=ss.quality;
-      if(prevSignal!=='bearish'){
-        const grade=ss.quality>=3?'★★★':ss.quality===2?'★★':'★';
-        SignalLog.add('sell',`SELL ${grade} score:${ss.score} [${strategy.activeSession()}${strategy.activeKillZone()?' · '+strategy.activeKillZone():''}]`,mid);
-        AutoTrader.onSignal('bearish', ss.quality);
+    } else if (ss.signal) {
+      AppState.currentSignal = 'bearish';
+      AppState.signalScore   = ss.score;
+      AppState.signalQuality = ss.quality;
+      if (prevSignal !== 'bearish') {
+        const grade = ss.quality >= 3 ? '★★★' : ss.quality === 2 ? '★★' : '★';
+        SignalLog.add('sell',
+          `SELL ${grade} M1-BMS | score:${ss.score} | ${strategy.activeSession()}${strategy.activeKillZone() ? ' · ' + strategy.activeKillZone() : ''}`,
+          mid);
       }
     } else {
-      AppState.currentSignal='standby';
-      AppState.signalScore=Math.max(bs.score,ss.score);
-      AppState.signalQuality=1;
+      AppState.currentSignal = 'standby';
+      AppState.signalScore   = Math.max(bs.score, ss.score);
+      AppState.signalQuality = 1;
     }
 
-    AppState.lastGateEval=new Date();
+    // ── Auto-open paper trade on new signal ──
+    if (AppState.currentSignal !== 'standby' && prevSignal !== AppState.currentSignal) {
+      if (AppState.currentSignal === 'bullish') PaperTrader.tryOpen('UP',   bs);
+      if (AppState.currentSignal === 'bearish') PaperTrader.tryOpen('DOWN', ss);
+    }
 
-    // Refresh UI
+    AppState.lastGateEval = new Date();
     GateUI.refreshAll();
     DashboardUI.refreshSignal();
     DashboardUI.refreshSignalView();
@@ -1759,17 +1741,6 @@ const DashboardUI = {
     const bal=AppState.accountBalance;
     $('d-balance').textContent=`$${bal.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
     $('equity-chip').textContent=`$${bal.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
-    // Daily PnL
-    const pnl=AppState.dailyPnl||0;
-    const dpEl=$('d-daily-pnl');
-    if(dpEl){ dpEl.textContent=`${pnl>=0?'+':''}$${pnl.toFixed(2)}`; dpEl.className='metric '+(pnl>=0?'up':'dn'); }
-    const total=AppState.wins+AppState.losses;
-    const dsEl=$('d-daily-sub'); if(dsEl) dsEl.textContent=`${total} trade${total!==1?'s':''}`;
-    // Float PnL
-    const float=AppState.openPositions.reduce((s,p)=>s+(p.pnl||0),0);
-    const fdEl=$('d-float-pnl-dash'); if(fdEl){ fdEl.textContent=`Float: ${float>=0?'+':''}$${float.toFixed(2)}`; fdEl.className='metric-sub '+(float>=0?'up':'dn'); }
-    // Best trade
-    const bt=$('d-best'); if(bt){ bt.textContent=`$${(AppState.bestTrade||0).toFixed(2)}`; }
     const dd=AppState.maxDrawdown||0;
     $('d-drawdown').textContent=dd.toFixed(2)+'%';
     const bar=$('d-dd-bar');
@@ -2095,301 +2066,347 @@ const FileExport = {
   }
 };
 
+
 // ══════════════════════════════════════════════════════
-//  AUTO TRADER — SIMULATED PAPER TRADING ENGINE
+//  PAPER TRADING ENGINE
 // ══════════════════════════════════════════════════════
-const AutoTrader = {
+const PaperTrader = {
   enabled: false,
-  _lastSignal: 'standby',
-  _tradeIdSeq: 1,
-  _lastOpenTime: 0,   // throttle: 1 trade per 5s minimum
-  _cooldownMs: 5000,
+  _nextId: 1,
+  _cooldownUntil: 0,
 
-  // ── Toggle on/off ──
-  toggle(el) {
+  toggle() {
     this.enabled = !this.enabled;
-    const btn = $('auto-trade-btn');
+    const btn = $('bot-toggle-btn');
     if (btn) {
-      btn.className = 'bot-btn ' + (this.enabled ? 'bot-on' : 'bot-off');
-      btn.textContent = this.enabled ? '⏹ STOP BOT' : '▶ START BOT';
+      btn.innerHTML = this.enabled
+        ? '<span class="bot-dot"></span> STOP BOT'
+        : '<span class="bot-dot"></span> START BOT';
+      btn.className = 'bot-btn ' + (this.enabled ? 'bot-active' : 'bot-inactive');
     }
-    const bar = $('bot-status-bar');
-    if (bar) bar.style.display = this.enabled ? 'flex' : 'none';
-    SignalLog.add('info', `Auto Trading ${this.enabled ? 'ENABLED — watching for signals' : 'DISABLED'}`, null);
-    UI.toast(this.enabled ? '🤖 Bot ACTIVE — monitoring signals' : '🔴 Bot stopped');
-    if (!this.enabled) this._lastSignal = 'standby';
+    if (this.enabled) {
+      UI.toast('▶ Paper trader ACTIVE — watching for signals');
+      SignalLog.add('info', `Paper trader started | Balance: $${AppState.accountBalance.toFixed(2)} | Risk: ${AppState.config.riskPct}% | TP: ${AppState.config.tpMultiple}R`, null);
+    } else {
+      UI.toast('⏹ Paper trader PAUSED');
+      SignalLog.add('info', 'Paper trader paused', null);
+    }
   },
 
-  // ── Called every tick ──
-  onTick(price) {
-    if (!this.enabled || !AppState.openPositions.length) return;
-    this._updatePositions(price);
-    PositionUI.refresh();
-    DashboardUI.refreshBalance();
-  },
-
-  // ── Called on signal change ──
-  onSignal(signal, quality) {
-    if (!this.enabled) return;
-    if (signal === this._lastSignal) return;
-    this._lastSignal = signal;
-    const now = Date.now();
-    if (now - this._lastOpenTime < this._cooldownMs) return;
-    if (signal === 'bullish') { this._tryOpen('UP', quality); this._lastOpenTime = now; }
-    else if (signal === 'bearish') { this._tryOpen('DOWN', quality); this._lastOpenTime = now; }
-  },
-
-  // ── ATR helper (true average true range) ──
-  _calcATR(tf, period) {
-    period = period || 14;
-    const arr = candles[tf];
-    if (!arr || arr.length < period + 2) return null;
-    const slice = arr.slice(-(period + 2));
+  calcATR(gran = 60, periods = 14) {
+    const arr = candles[gran];
+    if (!arr || arr.length < periods + 1) return 2.0;
+    const slice = arr.slice(-(periods + 1));
     let sum = 0;
-    for (let i = 1; i <= period; i++) {
+    for (let i = 1; i < slice.length; i++) {
       const c = slice[i], p = slice[i - 1];
-      const tr = Math.max(c.high - c.low, Math.abs(c.high - p.close), Math.abs(c.low - p.close));
+      const tr = Math.max(
+        c.high - c.low,
+        Math.abs(c.high - p.close),
+        Math.abs(c.low  - p.close)
+      );
       sum += tr;
     }
-    return sum / period;
+    return Math.max(0.5, sum / periods);
   },
 
-  // ── Open a simulated position ──
-  _tryOpen(dir, quality) {
-    const cfg = AppState.config;
-    if (AppState.openPositions.length >= cfg.maxTrades) {
-      SignalLog.add('info', `Max trades (${cfg.maxTrades}) reached — skip`, null);
-      return;
+  tryOpen(dir, evalResult) {
+    if (!this.enabled) return;
+    if (AppState.openPositions.length >= (AppState.config.maxTrades || 3)) return;
+    if (Date.now() < this._cooldownUntil) return;
+    if (!bid || !ask) return;
+
+    const isBuy  = dir === 'UP';
+    const entry  = isBuy ? ask : bid;
+    const ob     = evalResult.ob;
+    const fvg    = evalResult.fvg;
+    const atr    = this.calcATR(60, 14);
+    const buf    = AppState.config.beBufferPips || 0.5;
+
+    // ── SL placement ──
+    let slPrice;
+    if (ob) {
+      slPrice = isBuy ? ob.low  - buf : ob.high + buf;
+    } else if (fvg) {
+      slPrice = isBuy ? fvg.low - buf : fvg.high + buf;
+    } else {
+      slPrice = isBuy ? entry - atr * 1.8 : entry + atr * 1.8;
     }
-    if (!bid || !ask || bid <= 0) return;
 
-    // Use ask for buy, bid for sell (spread simulation)
-    const entryPrice = dir === 'UP' ? ask : bid;
+    const slDist = Math.abs(entry - slPrice);
+    if (slDist < 0.08) return; // SL too tight — skip
 
-    // ATR: try M1 first, fallback to M5
-    const atr = this._calcATR(60) || this._calcATR(300);
-    if (!atr || atr <= 0) {
-      SignalLog.add('info', 'ATR not ready — cannot size trade', null);
-      return;
-    }
+    // ── Lot size ──
+    // XAU/USD: 1 standard lot = 100 oz → $1 price move = $100 P&L
+    const riskAmt  = AppState.accountBalance * (AppState.config.riskPct / 100);
+    const rawLots  = riskAmt / (slDist * 100);
+    const lots     = Math.max(0.01, Math.floor(rawLots * 100) / 100);
 
-    // SL = 1.5 × ATR; TP = SL × tpMultiple
-    const slDist  = Math.max(atr * 1.5, 0.10);   // min 10¢ SL for safety
-    const tpDist  = slDist * cfg.tpMultiple;
-    const slPrice = dir === 'UP' ? entryPrice - slDist : entryPrice + slDist;
-    const tpPrice = dir === 'UP' ? entryPrice + tpDist : entryPrice - tpDist;
+    // ── TP placement ──
+    const tpMult   = AppState.config.tpMultiple || 2.5;
+    const tpPrice  = isBuy
+      ? entry + slDist * tpMult
+      : entry - slDist * tpMult;
 
-    // Lot sizing: riskAmt / (slDist × 100)
-    // XAUUSD: 1 standard lot = 100 oz → $1 move = $100 P/L per lot
-    const riskAmt = AppState.accountBalance * (cfg.riskPct / 100);
-    let lots = riskAmt / (slDist * 100);
-    lots = Math.round(Math.min(Math.max(lots, 0.01), 5.0) * 100) / 100;
-
-    const id = this._tradeIdSeq++;
-    const trade = {
-      id,
+    const pos = {
+      id:           this._nextId++,
       dir,
-      entry: entryPrice,
+      entry,
       slPrice,
       tpPrice,
-      slDist,
-      tpDist,
       lots,
+      openTime:     new Date(),
+      pnl:          0,
+      beTriggered:  false,
+      trailPhase:   0,
+      partialClosed:false,
       riskAmt,
-      openTime: new Date(),
-      pnl: 0,
-      trailPhase: 0,
-      beTriggered: false,
-      partialClosed: false,
+      slDist,
+      reason:       evalResult.score >= 14 ? 'A+ Sniper'
+                  : evalResult.score >=  9 ? 'Quality' : 'Standard',
+      score:        evalResult.score,
     };
 
-    AppState.openPositions.push(trade);
-    Storage.set('openPositions', AppState.openPositions);
+    AppState.openPositions.push(pos);
+    this._cooldownUntil = Date.now() + 90000; // 90 s between new entries
 
-    const grade = quality >= 3 ? '★★★' : quality === 2 ? '★★' : '★';
-    SignalLog.add(dir === 'UP' ? 'buy' : 'sell',
-      `AUTO ${dir === 'UP' ? 'BUY' : 'SELL'} ${grade} | ${lots.toFixed(2)}L @ ${entryPrice.toFixed(2)} | SL:${slPrice.toFixed(2)} TP:${tpPrice.toFixed(2)}`,
-      entryPrice);
-    UI.toast(`🤖 ${dir === 'UP' ? '▲ BUY' : '▼ SELL'} #${id} @ ${entryPrice.toFixed(2)} | SL:${slPrice.toFixed(2)}`);
-
-    // Flash
-    const fl = $('flashOverlay');
-    if (fl) {
-      fl.className = 'flash-overlay ' + (dir === 'UP' ? 'buy-flash' : 'sell-flash');
-      setTimeout(() => { fl.className = 'flash-overlay'; }, 250);
-    }
+    SignalLog.add(
+      isBuy ? 'buy' : 'sell',
+      `#${pos.id} OPEN ${lots}L @${entry.toFixed(2)} | SL:${slPrice.toFixed(2)} TP:${tpPrice.toFixed(2)} | R$${riskAmt.toFixed(2)} | ${pos.reason}`,
+      entry
+    );
+    UI.toast(`${isBuy ? '🟢 BUY' : '🔴 SELL'} #${pos.id} opened @ ${entry.toFixed(2)} — ${pos.reason}`);
 
     PositionUI.refresh();
     DashboardUI.refreshBalance();
+    drawChart();
   },
 
-  // ── Update all open positions every tick ──
-  _updatePositions(price) {
-    const cfg = AppState.config;
+  tick(currentMid) {
+    if (!AppState.openPositions.length) return;
+
+    const atr     = this.calcATR(60, 14);
     const toClose = [];
 
-    for (const pos of AppState.openPositions) {
-      const isBuy = pos.dir === 'UP';
-      const curPrice = isBuy ? bid : ask;
+    AppState.openPositions.forEach(pos => {
+      const isBuy    = pos.dir === 'UP';
+      // use bid for BUY exits (buyer receives bid), ask for SELL exits
+      const exitPrice = isBuy ? bid : ask;
 
-      // Floating P&L: priceDiff × lots × 100 (dollars per point per lot for gold)
-      const priceDiff = isBuy ? (curPrice - pos.entry) : (pos.entry - curPrice);
-      pos.pnl = priceDiff * pos.lots * 100;
+      // ── Floating P&L ──
+      const diff = isBuy ? (exitPrice - pos.entry) : (pos.entry - exitPrice);
+      pos.pnl = diff * pos.lots * 100;
 
-      // ── Check TP hit ──
-      if (isBuy && bid >= pos.tpPrice)  { toClose.push({ pos, reason: 'TP' }); continue; }
-      if (!isBuy && ask <= pos.tpPrice) { toClose.push({ pos, reason: 'TP' }); continue; }
-
-      // ── Check SL hit ──
-      if (isBuy && bid <= pos.slPrice)  { toClose.push({ pos, reason: 'SL' }); continue; }
-      if (!isBuy && ask >= pos.slPrice) { toClose.push({ pos, reason: 'SL' }); continue; }
-
-      // ── Break-even ──
+      // ── Break-even trigger ──
       if (!pos.beTriggered) {
-        const moveToward = isBuy ? (curPrice - pos.entry) : (pos.entry - curPrice);
-        if (moveToward >= pos.slDist * cfg.beTriggerR) {
-          const buf = cfg.beBufferPips * 0.10;
-          const newSL = isBuy ? pos.entry + buf : pos.entry - buf;
-          pos.slPrice = newSL;
+        const beDist = pos.slDist * (AppState.config.beTriggerR || 1.0);
+        const beHit  = isBuy
+          ? exitPrice >= pos.entry + beDist
+          : exitPrice <= pos.entry - beDist;
+        if (beHit) {
           pos.beTriggered = true;
-          SignalLog.add('info', `#${pos.id} BE → SL moved to ${newSL.toFixed(2)}`, curPrice);
+          pos.trailPhase  = 1;
+          const buf = AppState.config.beBufferPips || 0.5;
+          pos.slPrice = isBuy ? pos.entry + buf : pos.entry - buf;
+          SignalLog.add('info',
+            `#${pos.id} BE triggered → SL moved to ${pos.slPrice.toFixed(2)}`,
+            exitPrice
+          );
         }
       }
 
-      // ── Trailing stop phase 1 ──
-      if (pos.trailPhase < 1) {
-        const move = isBuy ? (curPrice - pos.entry) : (pos.entry - curPrice);
-        if (move >= pos.slDist * cfg.phase1Atr) {
-          const newSL = isBuy ? curPrice - pos.slDist * 0.8 : curPrice + pos.slDist * 0.8;
-          if ((isBuy && newSL > pos.slPrice) || (!isBuy && newSL < pos.slPrice)) {
-            pos.slPrice = newSL;
-            pos.trailPhase = 1;
-            SignalLog.add('info', `#${pos.id} Trail P1 → SL ${newSL.toFixed(2)}`, curPrice);
+      // ── Partial TP ──
+      if (!pos.partialClosed && (AppState.config.partialTpPct || 0) > 0) {
+        const halfDist = pos.slDist * (AppState.config.tpMultiple || 2.5) * 0.5;
+        const partHit  = isBuy
+          ? exitPrice >= pos.entry + halfDist
+          : exitPrice <= pos.entry - halfDist;
+        if (partHit) {
+          const pPct    = AppState.config.partialTpPct / 100;
+          const pLots   = Math.max(0.01, Math.floor(pos.lots * pPct * 100) / 100);
+          const pDiff   = isBuy ? exitPrice - pos.entry : pos.entry - exitPrice;
+          const pPnl    = pDiff * pLots * 100;
+          pos.lots      = Math.max(0.01, Math.round((pos.lots - pLots) * 100) / 100);
+          pos.partialClosed = true;
+          AppState.accountBalance += pPnl;
+          AppState.dailyPnl = (AppState.dailyPnl || 0) + pPnl;
+          AppState.equitySeries.push(AppState.accountBalance);
+          if (!pos.beTriggered) {
+            pos.beTriggered = true;
+            pos.trailPhase  = 1;
+            pos.slPrice = isBuy
+              ? pos.entry + (AppState.config.beBufferPips || 0.5)
+              : pos.entry - (AppState.config.beBufferPips || 0.5);
           }
+          SignalLog.add('info',
+            `#${pos.id} Partial TP: ${pLots}L @${exitPrice.toFixed(2)} → ${pPnl >= 0 ? '+' : ''}$${pPnl.toFixed(2)}`,
+            exitPrice
+          );
+          this._persistBalance();
         }
       }
 
-      // ── Trailing stop phase 2 ──
-      if (pos.trailPhase < 2) {
-        const move = isBuy ? (curPrice - pos.entry) : (pos.entry - curPrice);
-        if (move >= pos.slDist * cfg.phase2Atr) {
-          const newSL = isBuy ? curPrice - pos.slDist * 0.5 : curPrice + pos.slDist * 0.5;
-          if ((isBuy && newSL > pos.slPrice) || (!isBuy && newSL < pos.slPrice)) {
-            pos.slPrice = newSL;
-            pos.trailPhase = 2;
-            SignalLog.add('info', `#${pos.id} Trail P2 → SL ${newSL.toFixed(2)}`, curPrice);
-          }
-        }
+      // ── Trail SL — Phase 1 ──
+      if (pos.trailPhase === 1) {
+        const mult   = AppState.config.phase1Atr || 1.5;
+        const newSL  = isBuy ? exitPrice - atr * mult : exitPrice + atr * mult;
+        if (isBuy  && newSL > pos.slPrice) pos.slPrice = newSL;
+        if (!isBuy && newSL < pos.slPrice) pos.slPrice = newSL;
+        // Promote to phase 2
+        const p2Dist = pos.slDist * (AppState.config.tpMultiple || 2.5) * 0.75;
+        const p2Hit  = isBuy
+          ? exitPrice >= pos.entry + p2Dist
+          : exitPrice <= pos.entry - p2Dist;
+        if (p2Hit) pos.trailPhase = 2;
       }
+
+      // ── Trail SL — Phase 2 ──
+      if (pos.trailPhase === 2) {
+        const mult  = AppState.config.phase2Atr || 2.5;
+        const newSL = isBuy ? exitPrice - atr * mult : exitPrice + atr * mult;
+        if (isBuy  && newSL > pos.slPrice) pos.slPrice = newSL;
+        if (!isBuy && newSL < pos.slPrice) pos.slPrice = newSL;
+      }
+
+      // ── SL hit ──
+      if ((isBuy && exitPrice <= pos.slPrice) || (!isBuy && exitPrice >= pos.slPrice)) {
+        toClose.push({ pos, closePrice: pos.slPrice, reason: pos.beTriggered ? 'BE/Trail' : 'SL' });
+        return;
+      }
+
+      // ── TP hit ──
+      if ((isBuy && exitPrice >= pos.tpPrice) || (!isBuy && exitPrice <= pos.tpPrice)) {
+        toClose.push({ pos, closePrice: pos.tpPrice, reason: 'TP' });
+      }
+    });
+
+    toClose.forEach(({ pos, closePrice, reason }) => this._close(pos, closePrice, reason));
+
+    if (AppState.openPositions.length || toClose.length) {
+      PositionUI.refresh();
     }
-
-    // Close flagged positions
-    for (const { pos, reason } of toClose) this._closePosition(pos, reason);
   },
 
-  // ── Close a position and settle P&L ──
-  _closePosition(pos, reason) {
-    const isBuy = pos.dir === 'UP';
-    let closePrice;
-    if (reason === 'TP')     closePrice = pos.tpPrice;
-    else if (reason === 'SL') closePrice = pos.slPrice;
-    else                      closePrice = isBuy ? bid : ask;
+  _close(pos, closePrice, reason) {
+    const isBuy  = pos.dir === 'UP';
+    const diff   = isBuy ? (closePrice - pos.entry) : (pos.entry - closePrice);
+    const pnl    = diff * pos.lots * 100;
+    const rr     = pos.riskAmt > 0 ? pnl / pos.riskAmt : 0;
 
-    const priceDiff = isBuy ? (closePrice - pos.entry) : (pos.entry - closePrice);
-    const pnl = priceDiff * pos.lots * 100;
-    const rMultiple = pos.slDist > 0 ? (priceDiff / pos.slDist).toFixed(2) : '?';
-
-    pos.pnl = pnl;
-    pos.closePrice = closePrice;
-    pos.closeTime = new Date();
-    pos.closeReason = reason;
-
-    // Remove from open array
+    // Remove from open positions
     AppState.openPositions = AppState.openPositions.filter(p => p.id !== pos.id);
 
-    // Update balance
-    AppState.accountBalance = Math.max(0, AppState.accountBalance + pnl);
-    AppState.dailyPnl = (AppState.dailyPnl || 0) + pnl;
+    // Update running balance
+    AppState.accountBalance += pnl;
+    AppState.dailyPnl        = (AppState.dailyPnl || 0) + pnl;
     AppState.equitySeries.push(AppState.accountBalance);
     if (AppState.equitySeries.length > 500) AppState.equitySeries.shift();
 
-    // Win/loss stats
+    // Peak equity / drawdown
+    AppState._peakBalance = Math.max(AppState._peakBalance || AppState.config.balance, AppState.accountBalance);
+    const dd = ((AppState._peakBalance - AppState.accountBalance) / AppState._peakBalance) * 100;
+    AppState.maxDrawdown = Math.max(AppState.maxDrawdown || 0, dd);
+
+    // Win / loss counters
     if (pnl >= 0) {
       AppState.wins++;
-      if (pnl > (AppState.bestTrade || 0)) AppState.bestTrade = pnl;
-      if (reason === 'TP')    AppState.tpExits++;
-      else if (reason === 'TRAIL') AppState.trailExits++;
-      else                    AppState.beExits++;
+      AppState.bestTrade = Math.max(AppState.bestTrade || 0, pnl);
     } else {
       AppState.losses++;
-      if (reason === 'SL') AppState.slExits++;
     }
 
-    // Drawdown
-    const peak = AppState.equitySeries.length ? Math.max(...AppState.equitySeries) : AppState.accountBalance;
-    const dd = peak > 0 ? ((peak - AppState.accountBalance) / peak * 100) : 0;
-    if (dd > (AppState.maxDrawdown || 0)) AppState.maxDrawdown = dd;
+    // Exit type counters
+    if      (reason === 'TP')       AppState.tpExits    = (AppState.tpExits    || 0) + 1;
+    else if (reason === 'SL')       AppState.slExits    = (AppState.slExits    || 0) + 1;
+    else if (reason === 'BE/Trail') AppState.beExits    = (AppState.beExits    || 0) + 1;
+    else                            AppState.trailExits = (AppState.trailExits || 0) + 1;
 
-    // Persist
-    AppState.tradeHistory.unshift({ ...pos });
-    Storage.set('tradeHistory', AppState.tradeHistory.slice(0, 200));
-    Storage.set('accountBalance', AppState.accountBalance);
-    Storage.set('dailyPnl', AppState.dailyPnl);
-    Storage.set('wins', AppState.wins);
-    Storage.set('losses', AppState.losses);
-    Storage.set('maxDrawdown', AppState.maxDrawdown);
-    Storage.set('equitySeries', AppState.equitySeries.slice(-200));
-    Storage.set('bestTrade', AppState.bestTrade);
-    Storage.set('tpExits', AppState.tpExits);
-    Storage.set('slExits', AppState.slExits);
-    Storage.set('beExits', AppState.beExits);
-    Storage.set('trailExits', AppState.trailExits);
+    // Trade history record
+    AppState.tradeHistory.push({
+      id:        pos.id,
+      dir:       pos.dir,
+      lots:      pos.lots,
+      entry:     pos.entry,
+      close:     closePrice,
+      pnl,
+      rr,
+      reason,
+      openTime:  pos.openTime,
+      closeTime: new Date(),
+      signal:    pos.reason,
+      score:     pos.score,
+    });
 
-    const icon = pnl >= 0 ? '✅' : '❌';
-    SignalLog.add(pnl >= 0 ? 'buy' : 'sell',
-      `#${pos.id} [${reason}] ${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)} (${rMultiple}R) @ ${closePrice.toFixed(2)}`,
-      closePrice);
-    UI.toast(`${icon} #${pos.id} ${reason}: ${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}`);
+    this._persistBalance();
 
-    PositionUI.refresh();
+    // Signal log entry
+    const icon = reason === 'TP' ? '✅' : reason === 'SL' ? '❌' : '⚡';
+    SignalLog.add(
+      pnl >= 0 ? 'buy' : 'sell',
+      `${icon} #${pos.id} CLOSED [${reason}] @${closePrice.toFixed(2)} | ${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)} (${rr >= 0 ? '+' : ''}${rr.toFixed(2)}R)`,
+      closePrice
+    );
+    UI.toast(`${icon} #${pos.id} ${reason} | ${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)} (${rr >= 0 ? '+' : ''}${rr.toFixed(2)}R)`);
+
+    // Refresh all UI panels
     DashboardUI.refreshBalance();
     DashboardUI.refreshStats();
+    DashboardUI.refreshSignal();
     AnalyticsUI.refresh();
+    PositionUI.refresh();
+
+    const bestEl = $('d-best');
+    if (bestEl) bestEl.textContent = `$${(AppState.bestTrade || 0).toFixed(2)}`;
+
+    const rrEl = $('d-avg-rr');
+    if (rrEl && AppState.tradeHistory.length) {
+      const avg = AppState.tradeHistory.reduce((s, t) => s + t.rr, 0) / AppState.tradeHistory.length;
+      rrEl.textContent = avg.toFixed(2) + 'R';
+    }
+
+    const pnlEl = $('d-daily-pnl');
+    if (pnlEl) {
+      pnlEl.textContent = `${AppState.dailyPnl >= 0 ? '+' : ''}$${AppState.dailyPnl.toFixed(2)}`;
+      pnlEl.className   = 'metric ' + (AppState.dailyPnl >= 0 ? 'up' : 'dn');
+    }
+    const subEl = $('d-daily-sub');
+    if (subEl) subEl.textContent = `${AppState.wins + AppState.losses} trades`;
+
+    const chipEl = $('equity-chip');
+    if (chipEl) chipEl.textContent = `$${AppState.accountBalance.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+
+    drawChart();
   },
 
-  // ── Close all open positions manually ──
-  closeAll() {
-    const count = AppState.openPositions.length;
-    if (!count) { UI.toast('No open positions'); return; }
-    const copy = [...AppState.openPositions];
-    copy.forEach(pos => this._closePosition(pos, 'MANUAL'));
-    UI.toast(`Closed ${count} position(s)`);
+  _persistBalance() {
+    Storage.set('accountBalance', AppState.accountBalance);
+    Storage.set('dailyPnl',      AppState.dailyPnl);
+    Storage.set('wins',          AppState.wins);
+    Storage.set('losses',        AppState.losses);
+    Storage.set('tpExits',       AppState.tpExits || 0);
+    Storage.set('slExits',       AppState.slExits || 0);
+    Storage.set('beExits',       AppState.beExits || 0);
+    Storage.set('maxDrawdown',   AppState.maxDrawdown || 0);
+    Storage.set('bestTrade',     AppState.bestTrade   || 0);
+    Storage.set('equitySeries',  AppState.equitySeries.slice(-200));
+    Storage.set('tradeHistory',  AppState.tradeHistory.slice(-200));
   },
 
-  // ── Load persisted state on startup ──
-  loadPersisted() {
-    const keys = ['accountBalance','dailyPnl','wins','losses','maxDrawdown',
-                  'equitySeries','tradeHistory','bestTrade',
-                  'tpExits','slExits','beExits','trailExits','openPositions'];
-    for (const k of keys) {
-      const v = Storage.get(k);
-      if (v !== null && v !== undefined) AppState[k] = v;
-    }
-    // Recover open positions with proper numeric fields
-    AppState.openPositions = (AppState.openPositions || []).map(p => ({
-      ...p,
-      entry: +p.entry, slPrice: +p.slPrice, tpPrice: +p.tpPrice,
-      lots: +p.lots, pnl: +p.pnl, slDist: +p.slDist, tpDist: +p.tpDist,
-    }));
-    if (AppState.accountBalance && AppState.accountBalance !== AppState.config.balance) {
-      AppState.config.balance = AppState.accountBalance;
-    }
-    // Set highest trade id so we don't collide
-    if (AppState.tradeHistory && AppState.tradeHistory.length) {
-      const maxId = Math.max(...AppState.tradeHistory.map(t => t.id || 0));
-      if (maxId >= this._tradeIdSeq) this._tradeIdSeq = maxId + 1;
-    }
-  }
+  loadPersistedState() {
+    const savedBal = Storage.get('accountBalance', null);
+    if (savedBal !== null) AppState.accountBalance = savedBal;
+    AppState.dailyPnl     = Storage.get('dailyPnl',     0);
+    AppState.wins         = Storage.get('wins',          0);
+    AppState.losses       = Storage.get('losses',        0);
+    AppState.tpExits      = Storage.get('tpExits',       0);
+    AppState.slExits      = Storage.get('slExits',       0);
+    AppState.beExits      = Storage.get('beExits',       0);
+    AppState.maxDrawdown  = Storage.get('maxDrawdown',   0);
+    AppState.bestTrade    = Storage.get('bestTrade',     0);
+    AppState.equitySeries = Storage.get('equitySeries',  []);
+    AppState.tradeHistory = Storage.get('tradeHistory',  []);
+    AppState._peakBalance = Math.max(AppState.accountBalance, ...AppState.equitySeries, AppState.config.balance || 10000);
+  },
 };
 
 // ══════════════════════════════════════════════════════
@@ -2400,7 +2417,7 @@ window.addEventListener('resize', resizeCV);
 // Load persisted settings
 Storage.load();
 AppSettings.load();
-AutoTrader.loadPersisted();
+PaperTrader.loadPersistedState();
 
 // Initial chart size
 resizeCV();
@@ -2419,11 +2436,22 @@ setInterval(()=>{
   DashboardUI.refreshBalance();
   DashboardUI.refreshStats();
   PositionUI.refresh();
+  // Keep equity chip in sync
+  const chipEl = $('equity-chip');
+  if (chipEl) chipEl.textContent = '$' + AppState.accountBalance.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+  // Update daily P&L display
+  const pnlEl = $('d-daily-pnl');
+  if (pnlEl && AppState.openPositions.length) {
+    const floatTotal = AppState.openPositions.reduce((s, p) => s + (p.pnl || 0), 0);
+    const combined   = (AppState.dailyPnl || 0) + floatTotal;
+    pnlEl.textContent = (combined >= 0 ? '+' : '') + '$' + combined.toFixed(2);
+    pnlEl.className   = 'metric ' + (combined >= 0 ? 'up' : 'dn');
+  }
 }, 3000);
 
 // Log ready message
 SignalLog.add('info', 'XAU Compounder Pro — Deriv WebSocket data engine ready', null);
-SignalLog.add('info', 'Strategy: M5 HTF bias + M1 execution | OB/FVG/BMS detection active', null);
+SignalLog.add('info', 'Strategy: PURE M1 structure | BMS → OB/FVG entry | No HTF filter | Score max 17', null);
 
 </script>
 </body>
